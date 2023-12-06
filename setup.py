@@ -109,15 +109,8 @@ class CMakeBuild(build_ext):
             raise RuntimeError("Windows is not supported")
         
         try:
-            out = subprocess.check_output(['conda', '--version'])      
-        except OSError:
-            raise RuntimeError(
-                "conda must be installed to build the following extensions: " +
-                ", ".join(e.name for e in self.extensions))
-
-        try:
             out = subprocess.check_output(['gcc', '-dumpversion'])
-            out = out.decode()
+            out = out.decode().strip().split('.')
             if int(out[0]) < 5:
                 raise RuntimeError(
                     f"compiler version is too low {out}")                
@@ -145,13 +138,13 @@ class CMakeBuild(build_ext):
 
         self.distribution.bin_dir = bin_dir
         self.distribution.lib_dir = lib_dir
-        install_command = ["conda", "install", "cmake==3.18.2", "boost", "openblas", "gflags", "glog", "lmdb", "leveldb",
-                            "h5py", "hdf5", "scikit-image", "protobuf==3.6.1", "six", "numpy==1.20.1"]
+        install_command = ["pip", "install", "boost", "glog", "lmdb", "leveldb",
+                            "h5py", "hdf5", "scikit-image", "protobuf>=3.6.1", "six", "numpy>=1.20.1"]
         if subprocess.call(install_command) != 0:
             sys.exit(-1)
         
         python_version = 'python{}.{}'.format(*sys.version_info)
-        cmake_command = ['cmake', '-DANACONDA_HOME='+os.environ['CONDA_PREFIX'], '-DPYTHON_VERSION='+python_version, "-B", self.build_temp]
+        cmake_command = ['cmake', '-DPYTHON_VERSION='+python_version, "-B", self.build_temp]
         if subprocess.call(cmake_command) != 0:
             sys.exit(-1)            
 

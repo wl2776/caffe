@@ -1,0 +1,6 @@
+[requires]
+openblas/0.3.24
+gflags/2.2.2
+hdf5/1.14.3
+protobuf/3.21.12
+
